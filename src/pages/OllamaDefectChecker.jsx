@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { UploadCloud, FileImage, Menu, X, AlertTriangle } from "lucide-react";
 import Sidebar from "../components/sidebar";
-import ollama from "ollama";
 
 const OllamaDefectChecker = () => {
   const [image, setImage] = useState(null);
@@ -30,22 +29,26 @@ const OllamaDefectChecker = () => {
     const base64Image = await toBase64(image);
     
     try {
-      const response = await ollama.chat({
-        model: "gemma3:latest",
-        messages: [
-          {
-            role: "user",
-            content: "Carefully analyze the provided paper image and determine whether it is 'Defective' or 'Not Defective'. Identify defects such as marks, holes, folds, discoloration, or any other inconsistencies with high precision, even for minor flaws. Provide a classification as either 'Defective' or 'Not Defective' along with the reason or detected issues. If the image is not of paper, respond with 'The uploaded image does not align with the scope of this project. Please provide an image of sheets for defect detection.' without any further analysis.",
-            images: [base64Image],
-          },
-        ],
+      const response = await fetch("http://127.0.0.1:11434/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gemma3:latest",
+          prompt:
+            "Carefully analyze the provided paper image and determine whether it is 'Defective' or 'Not Defective'. Identify defects such as marks, holes, folds, discoloration, or any other inconsistencies with high precision, even for minor flaws. Provide a classification as either 'Defective' or 'Not Defective' along with the reason or detected issues. If the image is not of paper, respond with 'The uploaded image does not align with the scope of this project. Please provide an image of sheets for defect detection.' without any further analysis.",
+          images: [base64Image],
+          stream: false,
+        }),
       });
-      
-      setResult(response.message.content);
+
+      const data = await response.json();
+      setResult(data.response);
     } catch (error) {
       setResult("Error analyzing the image. Please try again.");
     }
-    
+
     setLoading(false);
   };
 
