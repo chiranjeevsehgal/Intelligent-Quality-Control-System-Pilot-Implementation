@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { UploadCloud, FileImage, Menu, X, AlertTriangle } from "lucide-react";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/SideNavbar";
 
 const OllamaDefectChecker = () => {
   const [image, setImage] = useState(null);

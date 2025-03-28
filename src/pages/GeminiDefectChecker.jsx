@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { UploadCloud, FileImage, Menu } from "lucide-react";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../components/SideNavbar";
 
 const GeminiDefectChecker = () => {
   const [image, setImage] = useState(null);
@@ -9,7 +9,7 @@ const GeminiDefectChecker = () => {
   const [result, setResult] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-//   To handle the image upload and create object url for it
+  //   To handle the image upload and create object url for it
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -19,35 +19,23 @@ const GeminiDefectChecker = () => {
   };
 
 
-//   To make a gemini api call and classify the image
+  //   To make a gemini api call and classify the image
   const classifyImage = async () => {
     if (!image) return;
     setLoading(true);
     setResult(null);
 
-    const apiKey = import.meta.env.VITE_GEMINI_API
-    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-002:generateContent?key=${apiKey}`;
-
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: "Carefully analyze the provided paper image and determine whether it is 'Defective' or 'Not Defective'. Identify defects such as marks, holes, folds, discoloration, or any other inconsistencies with high precision, even for minor flaws. Provide a classification as either 'Defective' or 'Not Defective' along with the reason or detected issues. If the image is not of paper, respond with 'The uploaded image does not align with the scope of this project. Please provide an image of sheets for defect detection.' without any further analysis." },
-            { inlineData: { mimeType: image.type, data: await toBase64(image) } }
-          ]
-        }
-      ]
-    };
+    const formData = new FormData();
+    formData.append("image", image);
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch("https://qc-backend-production.up.railway.app/api/classify-image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: formData
       });
 
       const data = await response.json();
-      setResult(data.candidates?.[0]?.content?.parts?.[0]?.text || "Error");
+      setResult(data.classification || "Error");
     } catch (error) {
       console.error("Error classifying image:", error);
       setResult("Error occurred");
@@ -56,14 +44,7 @@ const GeminiDefectChecker = () => {
     }
   };
 
-//   Coverting the image to base64 because gemini supports only inline image data
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = reject;
-    });
+
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -127,9 +108,9 @@ const GeminiDefectChecker = () => {
               {result ? (
                 <div className="mt-2">
                   <div className={`p-4 rounded-md ${result.toLowerCase().includes("defective") && !result.toLowerCase().includes("not defective") ||
-                      result.toLowerCase().includes("does not align")
-                      ? "bg-red-50 border border-red-200"
-                      : "bg-green-50 border border-green-200"
+                    result.toLowerCase().includes("does not align")
+                    ? "bg-red-50 border border-red-200"
+                    : "bg-green-50 border border-green-200"
                     }`}>
                     <div className="flex items-start">
                       <div>
