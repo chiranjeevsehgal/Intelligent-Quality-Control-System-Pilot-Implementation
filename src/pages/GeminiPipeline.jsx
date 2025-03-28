@@ -42,7 +42,7 @@ const GeminiDefectCheckerPipeline = () => {
 
     // WebSocket connection setup
     useEffect(() => {
-        const socket = new WebSocket("ws://qc-backend-production.up.railway.app/api/ws");
+        const socket = new WebSocket("wss://qc-backend-production.up.railway.app/api/ws");
 
         socket.onopen = () => {
             console.log("WebSocket connected");
