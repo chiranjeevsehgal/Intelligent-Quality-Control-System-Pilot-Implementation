@@ -30,7 +30,7 @@ const ImageDetailsModal = ({ isOpen, onClose, data }) => {
 
             try {
                 // Fetch the image from the backend API using the extracted file ID
-                const response = await fetch(`https://qc-backend-production.up.railway.app/api/drive/get-image?fileId=${fileId}`);
+                const response = await fetch(`https://intelligent-quality-control-system-pilot.onrender.com/api/drive/get-image?fileId=${fileId}`);
                 const result = await response.json();
 
                 if (result.data) {

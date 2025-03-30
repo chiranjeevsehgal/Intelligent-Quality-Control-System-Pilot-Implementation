@@ -42,7 +42,7 @@ const GeminiDefectCheckerPipeline = () => {
 
     // WebSocket connection setup
     useEffect(() => {
-        const socket = new WebSocket("wss://qc-backend-production.up.railway.app/api/ws");
+        const socket = new WebSocket("wss://intelligent-quality-control-system-pilot.onrender.com/api/ws");
 
         socket.onopen = () => {
             console.log("WebSocket connected");
@@ -145,7 +145,7 @@ const GeminiDefectCheckerPipeline = () => {
               const fileId = extractFileId(imageToProcess.url);
               if (!fileId) throw new Error('Invalid Google Drive URL');
           
-              const previewResponse = await fetch(`https://qc-backend-production.up.railway.app/api/drive/get-image?fileId=${fileId}`);
+              const previewResponse = await fetch(`https://intelligent-quality-control-system-pilot.onrender.com/api/drive/get-image?fileId=${fileId}`);
               const { data: previewData } = await previewResponse.json();
           
               setImageQueue(prevQueue =>
@@ -172,7 +172,7 @@ const GeminiDefectCheckerPipeline = () => {
           
               // Calling backend for the image analysis
               const base64Data = previewData;
-              const analysisResponse = await fetch('https://qc-backend-production.up.railway.app/api/analyze-image', {
+              const analysisResponse = await fetch('https://intelligent-quality-control-system-pilot.onrender.com/api/analyze-image', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ imageData: base64Data }),

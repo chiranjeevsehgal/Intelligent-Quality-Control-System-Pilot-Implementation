@@ -29,7 +29,7 @@ const GeminiDefectChecker = () => {
     formData.append("image", image);
 
     try {
-      const response = await fetch("https://qc-backend-production.up.railway.app/api/classify-image", {
+      const response = await fetch("https://intelligent-quality-control-system-pilot.onrender.com/api/classify-image", {
         method: "POST",
         body: formData
       });
