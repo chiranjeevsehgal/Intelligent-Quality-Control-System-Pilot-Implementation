@@ -3,7 +3,7 @@ import { FileImage, Check, X, Loader2, ChevronRight, ExternalLink, RefreshCw, Al
 import Sidebar from "../components/SideNavbar";
 import ImageDetailsModal from "../components/ImageDetailsModal";
 
-const GeminiDefectCheckerPipeline = () => {
+const CloudDefectCheckerPipeline = () => {
 
     const [result, setResult] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -340,7 +340,7 @@ const GeminiDefectCheckerPipeline = () => {
                             <div className="flex flex-col sm:flex-row items-start pr-8">
                                 <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-amber-600" />
                                 <div>
-                                    <h3 className="font-semibold mb-2 text-amber-800">Automated Detection Process</h3>
+                                    <h3 className="font-semibold mb-2 text-amber-800">Automated Defect Detection Process - Cloud Implementation</h3>
                                     <p className="text-sm">
                                     
 
@@ -543,4 +543,4 @@ const GeminiDefectCheckerPipeline = () => {
     );
 };
 
-export default GeminiDefectCheckerPipeline;
+export default CloudDefectCheckerPipeline;
