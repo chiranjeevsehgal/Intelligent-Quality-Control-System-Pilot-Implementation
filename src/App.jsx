@@ -10,7 +10,7 @@ function App() {
     <Routes>
             <Route path="/" element={<GeminiDefectChecker />} />
             <Route path="/ollama" element={<OllamaDefectChecker />} />
-            <Route path="/geminipipeline" element={<GeminiDefectCheckerPipeline/> } />
+            <Route path="/cloudpipeline" element={<GeminiDefectCheckerPipeline/> } />
     </Routes>
   )
 }

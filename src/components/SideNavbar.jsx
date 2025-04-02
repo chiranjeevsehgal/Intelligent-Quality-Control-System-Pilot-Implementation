@@ -8,9 +8,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, currentPage }) => {
     
 // Paths for the sidebar
   const sidebarItems = [
-    { name: "Gemini Model Testing", icon: <FileText className="h-5 w-5" />, path: "/" },
-    { name: "Ollama Model Testing", icon: <FileText className="h-5 w-5" />, path: "/ollama" },
-    { name: "Gemini Pipeline Testing", icon: <FileText className="h-5 w-5" />, path: "/geminipipeline" }
+    { name: "Gemini Upload", icon: <FileText className="h-5 w-5" />, path: "/" },
+    { name: "Ollama Upload", icon: <FileText className="h-5 w-5" />, path: "/ollama" },
+    { name: "Cloud Processing", icon: <FileText className="h-5 w-5" />, path: "/cloudpipeline" }
   ]
 
     //   To toggle the sidebar

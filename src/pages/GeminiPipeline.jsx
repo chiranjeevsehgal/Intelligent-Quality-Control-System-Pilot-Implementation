@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FileImage, Check, X, Loader2, CloudUpload, ChevronRight, ExternalLink, RefreshCw, AlertCircle, Menu } from "lucide-react";
+import { FileImage, Check, X, Loader2, ChevronRight, ExternalLink, RefreshCw, AlertCircle, Menu, Info } from "lucide-react";
 import Sidebar from "../components/SideNavbar";
 import ImageDetailsModal from "../components/ImageDetailsModal";
 
@@ -20,6 +20,7 @@ const GeminiDefectCheckerPipeline = () => {
     const [imageQueue, setImageQueue] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [noteVisible, setNoteVisible] = useState(true);
 
     const isProcessingRef = useRef(false);
 
@@ -118,91 +119,91 @@ const GeminiDefectCheckerPipeline = () => {
     useEffect(() => {
         const processNextImage = async () => {
             if (isProcessingRef.current) return;
-          
+
             const nextImageIndex = imageQueue.findIndex(img => img.status === 'pending');
             if (nextImageIndex === -1) {
-              isProcessingRef.current = false;
-              return;
-            }
-          
-            isProcessingRef.current = true;
-            const imageToProcess = imageQueue[nextImageIndex];
-          
-            setImageQueue(prevQueue =>
-              prevQueue.map((img, idx) =>
-                idx === nextImageIndex
-                  ? { ...img, status: 'processing', isCurrent: true }
-                  : { ...img, isCurrent: false }
-              )
-            );
-          
-            try {
-              setFileUrl(imageToProcess.url);
-              updateStage('preview', null);
-              updateStage('analysis', null);
-              setResult(null);
-          
-              const fileId = extractFileId(imageToProcess.url);
-              if (!fileId) throw new Error('Invalid Google Drive URL');
-          
-              const previewResponse = await fetch(`https://intelligent-quality-control-system-pilot.onrender.com/api/drive/get-image?fileId=${fileId}`);
-              const { data: previewData } = await previewResponse.json();
-          
-              setImageQueue(prevQueue =>
-                prevQueue.map((img, idx) =>
-                  idx === nextImageIndex ? { ...img, preview: previewData } : img
-                )
-              );
-              setPreviewSrc(previewData);
-              updateStage('preview', true);
-          
-              const cachedResult = localStorage.getItem(imageToProcess.url);
-              if (cachedResult) {
-                console.log("Using cached result:", cachedResult);
-                setResult(cachedResult);
-                setImageQueue(prevQueue =>
-                  prevQueue.map((img, idx) =>
-                    idx === nextImageIndex ? { ...img, status: 'completed', result: cachedResult } : img
-                  )
-                );
-                updateStage('analysis', true);
                 isProcessingRef.current = false;
                 return;
-              }
-          
-              // Calling backend for the image analysis
-              const base64Data = previewData;
-              const analysisResponse = await fetch('https://intelligent-quality-control-system-pilot.onrender.com/api/analyze-image', {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ imageData: base64Data }),
-              });
-          
-              const analysisResult = await analysisResponse.json();
-              const resultText = analysisResult.result || "Error";
-          
-              setResult(resultText);
-              localStorage.setItem(imageToProcess.url, resultText);
-              setImageQueue(prevQueue =>
-                prevQueue.map((img, idx) =>
-                  idx === nextImageIndex ? { ...img, status: 'completed', result: resultText } : img
-                )
-              );
-              updateStage('analysis', true);
-          
-            } catch (error) {
-              console.error("Error processing image:", error);
-              setResult("Error occurred");
-              setImageQueue(prevQueue =>
-                prevQueue.map((img, idx) =>
-                  idx === nextImageIndex ? { ...img, status: 'failed', result: "Error occurred" } : img
-                )
-              );
-              updateStage('analysis', false);
-            } finally {
-              isProcessingRef.current = false;
             }
-          };
+
+            isProcessingRef.current = true;
+            const imageToProcess = imageQueue[nextImageIndex];
+
+            setImageQueue(prevQueue =>
+                prevQueue.map((img, idx) =>
+                    idx === nextImageIndex
+                        ? { ...img, status: 'processing', isCurrent: true }
+                        : { ...img, isCurrent: false }
+                )
+            );
+
+            try {
+                setFileUrl(imageToProcess.url);
+                updateStage('preview', null);
+                updateStage('analysis', null);
+                setResult(null);
+
+                const fileId = extractFileId(imageToProcess.url);
+                if (!fileId) throw new Error('Invalid Google Drive URL');
+
+                const previewResponse = await fetch(`https://intelligent-quality-control-system-pilot.onrender.com/api/drive/get-image?fileId=${fileId}`);
+                const { data: previewData } = await previewResponse.json();
+
+                setImageQueue(prevQueue =>
+                    prevQueue.map((img, idx) =>
+                        idx === nextImageIndex ? { ...img, preview: previewData } : img
+                    )
+                );
+                setPreviewSrc(previewData);
+                updateStage('preview', true);
+
+                const cachedResult = localStorage.getItem(imageToProcess.url);
+                if (cachedResult) {
+                    console.log("Using cached result:", cachedResult);
+                    setResult(cachedResult);
+                    setImageQueue(prevQueue =>
+                        prevQueue.map((img, idx) =>
+                            idx === nextImageIndex ? { ...img, status: 'completed', result: cachedResult } : img
+                        )
+                    );
+                    updateStage('analysis', true);
+                    isProcessingRef.current = false;
+                    return;
+                }
+
+                // Calling backend for the image analysis
+                const base64Data = previewData;
+                const analysisResponse = await fetch('https://intelligent-quality-control-system-pilot.onrender.com/api/analyze-image', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ imageData: base64Data }),
+                });
+
+                const analysisResult = await analysisResponse.json();
+                const resultText = analysisResult.result || "Error";
+
+                setResult(resultText);
+                localStorage.setItem(imageToProcess.url, resultText);
+                setImageQueue(prevQueue =>
+                    prevQueue.map((img, idx) =>
+                        idx === nextImageIndex ? { ...img, status: 'completed', result: resultText } : img
+                    )
+                );
+                updateStage('analysis', true);
+
+            } catch (error) {
+                console.error("Error processing image:", error);
+                setResult("Error occurred");
+                setImageQueue(prevQueue =>
+                    prevQueue.map((img, idx) =>
+                        idx === nextImageIndex ? { ...img, status: 'failed', result: "Error occurred" } : img
+                    )
+                );
+                updateStage('analysis', false);
+            } finally {
+                isProcessingRef.current = false;
+            }
+        };
 
         // Process next image if not currently processing
         if (!isProcessingRef.current) {
@@ -291,28 +292,69 @@ const GeminiDefectCheckerPipeline = () => {
 
 
     return (
-        <div className="flex h-screen bg-gray-50">
-            <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} currentPage="/geminipipeline" />
-            <div className={`flex-1 transition-all duration-300 ease-in-out ${sidebarOpen ? "md:ml-64" : "md:ml-20"} p-6 overflow-y-auto`}>
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex flex-row items-center mb-6">
+        <div className="flex flex-col md:flex-row h-screen bg-gray-50">
+            <Sidebar
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                currentPage="/cloudpipeline"
+            />
+
+            <div
+                className={`flex-1 transition-all duration-300 ease-in-out 
+          ${sidebarOpen ? "md:ml-64" : "md:ml-20"}
+          p-4 sm:p-6 overflow-y-auto`}
+            >
+                <div className="max-w-8xl mx-auto flex flex-col">
+
+                    <div className="mb-4 flex flex-row items-center">
                         {!sidebarOpen && (
-                            <button onClick={() => setSidebarOpen(true)} className="mr-4 text-gray-500 hover:text-gray-700 items-center">
+                            <button
+                                onClick={() => setSidebarOpen(true)}
+                                className="mr-4 text-gray-500 hover:text-gray-700"
+                            >
                                 <Menu className="h-6 w-6" />
                             </button>
                         )}
-                        <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-                            {/* <CloudUpload className="mr-3 text-blue-600" /> */}
-                            Defect Pipeline - Gemini
-                        </h1>
+                        <div className="flex justify-between items-center w-full">
+                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Cloud</h1>
+                            <button
+                                onClick={resetAllStates}
+                                className="flex items-center px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                            >
+                                <RefreshCw className="h-5 w-5 mr-2" />
+                                Reset All
+                            </button>
+                        </div>
                     </div>
-                    <button
-                        onClick={resetAllStates}
-                        className="flex items-center px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                    >
-                        <RefreshCw className="h-5 w-5 mr-2" />
-                        Reset All
-                    </button>
+                    {/* Informative Note Box */}
+                    {noteVisible && (
+                        <div
+                            className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg mb-6 p-4 relative"
+                        >
+                            <button
+                                onClick={() => setNoteVisible(false)}
+                                className="absolute top-2 right-2 text-amber-600 hover:text-amber-800 transition-colors"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                            <div className="flex flex-col sm:flex-row items-start pr-8">
+                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-amber-600" />
+                                <div>
+                                    <h3 className="font-semibold mb-2 text-amber-800">Automated Detection Process</h3>
+                                    <p className="text-sm">
+                                    
+
+                                    </p>
+                                    <ul className="list-disc list-inside mt-2 text-sm">
+                                        <li>This demonstration leverages Google App Script to monitor changes in the data source (Google Drive).</li>
+                                        <li>When new files are detected, App Script triggers an execution that notifies the backend via a WebSocket implementation.</li>
+                                        <li>This enables real-time image processing and defect analysis.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
 
                 {/* Two-column layout for preview and results */}
