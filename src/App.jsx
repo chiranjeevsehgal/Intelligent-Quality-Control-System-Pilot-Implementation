@@ -4,6 +4,7 @@ import GeminiDefectChecker from './pages/GeminiDefectChecker';
 import OllamaDefectChecker from './pages/OllamaDefectChecker';
 import CloudDefectCheckerPipeline from './pages/CloudProcessingPipeline';
 import EdgeDefectCheckerPipeline from './pages/EdgeProcessingPipeline';
+import EdgeDefectCheckerPipeline_Kafka from './pages/EdgeProcessingPipeline_Airflow';
 
 function App() {
   
@@ -13,6 +14,7 @@ function App() {
             <Route path="/ollama" element={<OllamaDefectChecker />} />
             <Route path="/cloudpipeline" element={<CloudDefectCheckerPipeline/> } />
             <Route path="/edgepipeline" element={<EdgeDefectCheckerPipeline/> } />
+            <Route path="/edgepipeline1" element={<EdgeDefectCheckerPipeline_Kafka/> } />
     </Routes>
   )
 }

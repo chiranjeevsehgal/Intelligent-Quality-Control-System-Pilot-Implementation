@@ -3,7 +3,7 @@ import { FileImage, Check, X, Loader2, ChevronRight, ExternalLink, RefreshCw, Al
 import Sidebar from "../components/SideNavbar";
 import EdgeImageDetailsModal from "../components/Edge_ImageDetailsModal";
 
-const EdgeDefectCheckerPipeline = () => {
+const EdgeDefectCheckerPipeline_Kafka = () => {
     const [result, setResult] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [connectionStatus, setConnectionStatus] = useState("disconnected");
@@ -266,7 +266,7 @@ const EdgeDefectCheckerPipeline = () => {
             <Sidebar
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
-                currentPage="/edgepipeline"
+                currentPage="/edgepipeline1"
             />
 
             <div
@@ -317,7 +317,7 @@ const EdgeDefectCheckerPipeline = () => {
                                     </p>
                                     <ul className="list-disc list-inside mt-2 text-sm">
                                         <li>This demonstration uses a Node.js library to monitor files in a local input directory.</li>
-                                        <li>Folder monitoring is being done through Node library - Chokidar.</li>
+                                        <li>Folder monitoring is being done through Airflow and Kafka.</li>
                                         <li>When a file is added or modified, the system detects the change and extracts metadata.</li>
                                         <li>The metadata is then passed to the processing module, which analyzes the file using AI.</li>
                                         
@@ -529,4 +529,4 @@ const EdgeDefectCheckerPipeline = () => {
     );
 };
 
-export default EdgeDefectCheckerPipeline;
+export default EdgeDefectCheckerPipeline_Kafka;
