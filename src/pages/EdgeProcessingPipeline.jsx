@@ -54,7 +54,7 @@ const EdgeDefectCheckerPipeline = () => {
     // WebSocket connection setup
     useEffect(() => {
         const socket = new WebSocket("ws://localhost:5001/api/ws");
-
+ 
         socket.onopen = () => {
             console.log("WebSocket connected");
             setConnectionStatus("connected");
