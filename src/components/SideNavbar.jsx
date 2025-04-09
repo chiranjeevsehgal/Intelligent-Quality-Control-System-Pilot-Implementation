@@ -22,7 +22,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, currentPage }) => {
   // Edge processing dropdown items
   const edgeProcessingItems = [
     { name: "With Node Library", path: "/edgepipeline" },
-    { name: "With Airflow+Kafka", path: "/edgepipeline1" }
+    { name: "With Airflow+Kafka", path: "/edgepipeline1" },
+    { name: "With Custom Model", path: "/edgepipeline2" }
   ]
 
   // To check if the current item is active

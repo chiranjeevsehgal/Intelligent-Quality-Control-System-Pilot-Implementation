@@ -286,7 +286,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                             </button>
                         )}
                         <div className="flex justify-between items-center w-full">
-                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Edge</h1>
+                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Edge (Gemini)</h1>
                             <button
                                 onClick={resetAllStates}
                                 className="flex items-center px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
@@ -316,10 +316,9 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
 
                                     </p>
                                     <ul className="list-disc list-inside mt-2 text-sm">
-                                        <li>This demonstration uses a Node.js library to monitor files in a local input directory.</li>
-                                        <li>Folder monitoring is being done through Airflow and Kafka.</li>
+                                        <li>This demonstration uses Airflow and Kafka to monitor files in a local input directory.</li>
                                         <li>When a file is added or modified, the system detects the change and extracts metadata.</li>
-                                        <li>The metadata is then passed to the processing module, which analyzes the file using AI.</li>
+                                        <li>The metadata is then passed to the processing module, which analyzes the file using <span className="font-bold">Gemini</span>.</li>
                                         
                                     </ul>
 

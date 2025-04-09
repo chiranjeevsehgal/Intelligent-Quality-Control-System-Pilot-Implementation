@@ -5,6 +5,7 @@ import OllamaDefectChecker from './pages/OllamaDefectChecker';
 import CloudDefectCheckerPipeline from './pages/CloudProcessingPipeline';
 import EdgeDefectCheckerPipeline from './pages/EdgeProcessingPipeline';
 import EdgeDefectCheckerPipeline_Kafka from './pages/EdgeProcessingPipeline_Airflow';
+import EdgeDefectCheckerPipeline_Custom from './pages/EdgeProcessingPipeline_Custom';
 
 function App() {
   
@@ -15,6 +16,7 @@ function App() {
             <Route path="/cloudpipeline" element={<CloudDefectCheckerPipeline/> } />
             <Route path="/edgepipeline" element={<EdgeDefectCheckerPipeline/> } />
             <Route path="/edgepipeline1" element={<EdgeDefectCheckerPipeline_Kafka/> } />
+            <Route path="/edgepipeline2" element={<EdgeDefectCheckerPipeline_Custom/> } />
     </Routes>
   )
 }
