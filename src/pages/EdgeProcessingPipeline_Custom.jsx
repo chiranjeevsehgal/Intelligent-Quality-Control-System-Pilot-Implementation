@@ -28,6 +28,12 @@ const EdgeDefectCheckerPipeline_Custom = () => {
     const previewContainerRef = useRef(null);
 
     const [originalImage, setOriginalImage] = useState(null);
+    
+    
+    const [currentFile, setCurrentFile] = useState(null);
+    const currentFileRef = useRef(null);
+    
+
 
 
     const openModal = (image) => {
@@ -63,6 +69,11 @@ const EdgeDefectCheckerPipeline_Custom = () => {
         }));
     };
 
+    const setCurrentFileTracked = (filePath) => {
+        setCurrentFile(filePath);
+        currentFileRef.current = filePath;
+    };
+
     // WebSocket connection setup
     useEffect(() => {
         const socket = new WebSocket("ws://localhost:5001/api/ws");
@@ -86,20 +97,29 @@ const EdgeDefectCheckerPipeline_Custom = () => {
                 setImageData(data.result.annotatedImage);
             }
 
-            if (data?.result?.defects && data?.result?.defects.length > 0) {
-                setDefects(data.result.defects);
-            }
+            
 
             if (data.type === "ORIGINAL" && data.data.previewData) {
                 resetforNext()
                 setOriginalImage(data.data.previewData);
+                setCurrentFileTracked(data.data.filePath); // Use the tracked setter
                 updateStage('preview', true);
 
             }
+        
 
             if (data.type === "LOCAL_FILE_RESULT" && data.data.annotated) {
-                setPreviewSrc(data.data.annotated);
-                updateStage('analysis', true);
+                
+                if (currentFileRef.current === data.data.filePath){
+                    setPreviewSrc(data.data.annotated); 
+                    updateStage('analysis', true);
+                    setDefects(data.data.defects);
+                    
+                    // if (data?.data?.defects && data?.data?.defects.length > 0) {
+                    // }
+                }
+
+                
 
 
                 setImageQueue(prevQueue => {

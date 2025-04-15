@@ -20,6 +20,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fullscreenImage, setFullscreenImage] = useState(null);
     const [noteVisible, setNoteVisible] = useState(true);
+    const [currentProcessingId, setCurrentProcessingId] = useState(null);
 
     const isProcessingRef = useRef(false);
 
@@ -67,8 +68,6 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
             console.log("Message from server:", data);
 
             if (data.type === "LOCAL_FILE_RESULT" && data.data.previewData) {
-                setPreviewSrc(data.data.previewData);
-
                 setImageQueue(prevQueue => {
                     const newImage = {
                         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -121,6 +120,10 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
 
             isProcessingRef.current = true;
             const imageToProcess = imageQueue[nextImageIndex];
+            
+            // Set the current processing ID and preview
+            setCurrentProcessingId(imageToProcess.id);
+            setPreviewSrc(imageToProcess.preview);
 
             setImageQueue(prevQueue =>
                 prevQueue.map((img, idx) =>
@@ -135,7 +138,6 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                 updateStage('analysis', null);
                 setResult(null);
 
-                setPreviewSrc(imageToProcess.preview);
                 updateStage('preview', true);
 
                 const cachedResult = localStorage.getItem(imageToProcess.filePath);
@@ -149,6 +151,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                     );
                     updateStage('analysis', true);
                     isProcessingRef.current = false;
+                    setCurrentProcessingId(null);
                     return;
                 }
 
@@ -184,13 +187,24 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                 updateStage('analysis', false);
             } finally {
                 isProcessingRef.current = false;
+                setCurrentProcessingId(null);
             }
         };
 
-        if (!isProcessingRef.current) {
+        if (!isProcessingRef.current && imageQueue.some(img => img.status === 'pending')) {
             processNextImage();
         }
     }, [imageQueue]);
+
+    // Keep showing the preview of the currently processing image
+    useEffect(() => {
+        if (currentProcessingId) {
+            const currentImage = imageQueue.find(img => img.id === currentProcessingId);
+            if (currentImage) {
+                setPreviewSrc(currentImage.preview);
+            }
+        }
+    }, [currentProcessingId, imageQueue]);
 
     // Status display components
     const ProcessStage = ({ name, status }) => {
@@ -243,6 +257,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
         setIsLoading(false);
         setImageQueue([]);
         setFullscreenImage(null);
+        setCurrentProcessingId(null);
 
         if (connectionStatus !== "connected") {
             setProcessingStages({

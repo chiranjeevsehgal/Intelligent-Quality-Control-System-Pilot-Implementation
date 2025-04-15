@@ -78,15 +78,15 @@ const EdgeImageDetailsModal_Custom = ({ isOpen, onClose, data, defects, annotate
                 <div className="mt-4 text-center">
                     <span
                         className={`inline-block px-4 py-2 text-sm font-medium rounded-lg shadow-sm ${
-                            defects && defects.length > 0
+                            data.defects && data.defects.length > 0
                                 ? "bg-red-100 text-red-700"
-                                : defects && defects.length === 0
+                                : data.defects && data.defects.length === 0
                                 ? "bg-green-100 text-green-700"
                                 : "bg-gray-100 text-gray-700"
                         }`}
                     >
-                        {defects
-                            ? defects.length > 0
+                        {data.defects
+                            ? data.defects.length > 0
                                 ? "Defective"
                                 : "Not Defective"
                             : "Classifying..."}
@@ -94,7 +94,7 @@ const EdgeImageDetailsModal_Custom = ({ isOpen, onClose, data, defects, annotate
                 </div>
 
                 {/* Defects Table */}
-                {defects && defects.length > 0 && (
+                {data.defects && data.defects.length > 0 && (
                     <div className="mt-6 overflow-x-auto">
                         <table className="min-w-full border text-sm text-left">
                             <thead className="bg-gray-50 text-gray-700 font-semibold">
