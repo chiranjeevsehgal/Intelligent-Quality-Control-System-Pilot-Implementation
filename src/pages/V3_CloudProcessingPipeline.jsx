@@ -1,6 +1,12 @@
+/**
+ * Version 3
+ * For the Cloud Implementation using Google Drive
+ * Uses Google App Script to monitor changes in the data source (Google Drive)
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { FileImage, Check, X, Loader2, ChevronRight, ExternalLink, RefreshCw, AlertCircle, Menu, Info } from "lucide-react";
-import Sidebar from "../components/SideNavbar";
+import Sidebar from "../components/Sidebar";
 import ImageDetailsModal from "../components/ImageDetailsModal";
 
 const CloudDefectCheckerPipeline = () => {
@@ -43,6 +49,7 @@ const CloudDefectCheckerPipeline = () => {
 
     // WebSocket connection setup
     useEffect(() => {
+        // Backend url, where Web socket is initialized
         const socket = new WebSocket("wss://intelligent-quality-control-system-pilot.onrender.com/api/ws");
 
         socket.onopen = () => {
@@ -146,6 +153,10 @@ const CloudDefectCheckerPipeline = () => {
                 const fileId = extractFileId(imageToProcess.url);
                 if (!fileId) throw new Error('Invalid Google Drive URL');
 
+                /** 
+                 * Backend url, where image processing will occur
+                 * It has to be hosted, as Google AppScript requires, the webhook to be in a hosted environment 
+                 * */
                 const previewResponse = await fetch(`https://intelligent-quality-control-system-pilot.onrender.com/api/drive/get-image?fileId=${fileId}`);
                 const { data: previewData } = await previewResponse.json();
 
@@ -329,26 +340,22 @@ const CloudDefectCheckerPipeline = () => {
                     {/* Informative Note Box */}
                     {noteVisible && (
                         <div
-                            className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg mb-6 p-4 relative"
+                            className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg mb-6 p-4 relative"
                         >
                             <button
                                 onClick={() => setNoteVisible(false)}
-                                className="absolute top-2 right-2 text-amber-600 hover:text-amber-800 transition-colors"
+                                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 transition-colors"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                             <div className="flex flex-col sm:flex-row items-start pr-8">
-                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-amber-600" />
+                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-blue-600" />
                                 <div>
-                                <h3 className="font-semibold mb-2 text-amber-800">Automated Defect Detection Process - Cloud Implementation</h3>
-                                    <p className="text-sm">
-                                    
-
-                                    </p>
+                                    <h3 className="font-semibold mb-2 text-blue-800">Automated Defect Detection Process - Cloud Implementation</h3>
                                     <ul className="list-disc list-inside mt-2 text-sm">
-                                        <li>This demonstration leverages Google App Script to monitor changes in the data source (Google Drive).</li>
-                                        <li>When new files are detected, App Script triggers an execution that notifies the backend via a WebSocket implementation.</li>
-                                        <li>This enables real-time image processing and defect analysis.</li>
+                                        <li>This demonstration leverages <span className="font-bold">Google App Script</span> to monitor changes in the data source (Google Drive).</li>
+                                        <li>When new files are detected, App Script triggers an execution that notifies and sends the file metadata to the backend via a <span className="font-bold">WebHook</span> implementation.</li>
+                                        <li>The metadata is then passed to the processing module, which analyzes the file using <span className="font-bold">Gemini</span>.</li>
                                     </ul>
                                 </div>
                             </div>

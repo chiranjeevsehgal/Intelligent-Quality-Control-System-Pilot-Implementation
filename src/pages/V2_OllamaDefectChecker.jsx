@@ -1,70 +1,70 @@
+/**
+ * Version 2 - Updated
+ * For the File Upload Functionality
+ * Uses Ollama (gemma3 model) to analyze the image via backend API
+ * Ollama should be running locally on the server.
+ */
+
 import React, { useState } from "react";
-import { UploadCloud, FileImage, Menu, X, AlertTriangle } from "lucide-react";
-import Sidebar from "../components/SideNavbar";
+import { UploadCloud, FileImage, Menu, X, Info } from "lucide-react";
+import Sidebar from "../components/Sidebar";
 
 const OllamaDefectChecker = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [noteVisible, setNoteVisible] = useState(true);
 
-  //   To handle the image upload and create object url for it
+  // To handle the image upload and create object url for it
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       setImage(file);
       setPreview(URL.createObjectURL(file));
+      setError(null);
+      setResult(null);
     }
   };
 
-
-//   To make a ollama api call and classify the image
+  // Call backend API to analyze the image
   const classifyImage = async () => {
     if (!image) return;
     setLoading(true);
     setResult(null);
+    setError(null);
 
-    const base64Image = await toBase64(image);
-    
+    const formData = new FormData();
+    formData.append("image", image);
+
     try {
-      const response = await fetch("http://127.0.0.1:11434/api/generate", {
+      // Backend API endpoint
+      const response = await fetch("http://localhost:5001/api/classify-image-ollama", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gemma3:latest",
-          prompt:
-            "Carefully analyze the provided paper image and determine whether it is 'Defective' or 'Not Defective'. Identify defects such as marks, holes, folds, discoloration, or any other inconsistencies with high precision, even for minor flaws. Provide a classification as either 'Defective' or 'Not Defective' along with the reason or detected issues. If the image is not of paper, respond with 'The uploaded image does not align with the scope of this project. Please provide an image of sheets for defect detection.' without any further analysis.",
-          images: [base64Image],
-          stream: false,
-        }),
+        body: formData
       });
 
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to analyze image");
+      }
+      
       setResult(data.response);
     } catch (error) {
-      setResult("Error analyzing the image. Please try again.");
+      console.error("Error analyzing image:", error);
+      setError(error.message || "Error analyzing the image. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
-  //   Coverting the image to base64 format
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = reject;
-    });
-
-    // To handle the markdown response received from the model
+  // To handle the markdown response received from the model
   const renderResultWithFormatting = (text) => {
     const lines = text.split('\n');
-    
+
     return (
       <div className="space-y-2">
         {lines.map((line, index) => {
@@ -75,7 +75,7 @@ const OllamaDefectChecker = () => {
               </h3>
             );
           }
-          
+
           if (line.startsWith('*')) {
             return (
               <div key={index} className="flex items-start">
@@ -84,7 +84,7 @@ const OllamaDefectChecker = () => {
               </div>
             );
           }
-          
+
           return <p key={index}>{line}</p>;
         })}
       </div>
@@ -93,23 +93,23 @@ const OllamaDefectChecker = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50">
-      <Sidebar 
-        sidebarOpen={sidebarOpen} 
-        setSidebarOpen={setSidebarOpen} 
-        currentPage="/ollama" 
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        currentPage="/ollama"
       />
-      
-      <div 
+
+      <div
         className={`flex-1 transition-all duration-300 ease-in-out 
           ${sidebarOpen ? "md:ml-64" : "md:ml-20"}
           p-4 sm:p-6 overflow-y-auto`}
       >
         <div className="max-w-8xl mx-auto">
-          
+
           <div className="mb-6 flex flex-row items-center">
             {!sidebarOpen && (
-              <button 
-                onClick={() => setSidebarOpen(true)} 
+              <button
+                onClick={() => setSidebarOpen(true)}
                 className="mr-4 text-gray-500 hover:text-gray-700"
               >
                 <Menu className="h-6 w-6" />
@@ -120,28 +120,31 @@ const OllamaDefectChecker = () => {
 
           {/* Informative Note Box */}
           {noteVisible && (
-            <div 
-              className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg mb-6 p-4 relative"
+            <div
+              className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg mb-6 p-4 relative"
             >
-              <button 
+              <button
                 onClick={() => setNoteVisible(false)}
-                className="absolute top-2 right-2 text-amber-600 hover:text-amber-800 transition-colors"
+                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
               <div className="flex flex-col sm:flex-row items-start pr-8">
-                <AlertTriangle className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-amber-600" />
+                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-blue-600" />
                 <div>
-                  <h3 className="font-semibold mb-2 text-amber-800">Ollama Local Setup Required</h3>
+                <h3 className="font-semibold mb-2 text-blue-800">Automated Defect Detection Process - File Upload Implementation</h3>
                   <p className="text-sm">
-                    To use this model, you need to run Ollama locally on your machine. 
-                    Please ensure you have:
+                    This feature requires <span className="font-bold">Ollama</span> running on the server.
+                    The backend handles:
                   </p>
-                    <ul className="list-disc list-inside mt-2 text-sm">
-                      <li>Ollama installed</li>
-                      <li>Gemma3 model pulled (run: <code>ollama pull gemma3</code>)</li>
-                      <li>Ollama server running</li>
-                    </ul>
+                  <ul className="list-disc list-inside mt-2 mb-2 text-sm ml-6">
+                    <li>Secure image processing</li>
+                    <li>Communication with the Ollama API</li>
+                    <li>Analysis using the <span className="font-bold">Gemma3 Model</span></li>
+                  </ul>
+                  <p className="text-sm">
+                    Upload an image to analyze it for defects.
+                  </p>
                 </div>
               </div>
             </div>
@@ -155,7 +158,7 @@ const OllamaDefectChecker = () => {
                 {!preview ? (
                   <>
                     <UploadCloud className="h-8 sm:h-12 w-8 sm:w-12 text-gray-400 mb-3" />
-                    <span className="text-xs sm:text-sm font-medium text-gray-700">Drag and drop or click to upload</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">Click to upload the image</span>
                     <span className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, WEBP</span>
                   </>
                 ) : (
@@ -184,18 +187,22 @@ const OllamaDefectChecker = () => {
 
             <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <h2 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Analysis Results</h2>
-              {result ? (
-                  <div className="mt-2">
+              {error ? (
+                <div className="p-4 rounded-md bg-red-50 border border-red-200 text-red-700">
+                  <p className="font-medium mb-1">Error</p>
+                  <p>{error}</p>
+                </div>
+              ) : result ? (
+                <div className="mt-2">
                   <div className={`p-4 rounded-md ${result.toLowerCase().includes("defective") && !result.toLowerCase().includes("not defective") ||
-                      result.toLowerCase().includes("does not align")
-                      ? "bg-red-50 border border-red-200"
-                      : "bg-green-50 border border-green-200"
+                    result.toLowerCase().includes("does not align")
+                    ? "bg-red-50 border border-red-200"
+                    : "bg-green-50 border border-green-200"
                     }`}>
                     <div className="flex items-start">
                       <div>
                         <div className='mt-2 text-sm'>
-                          <p>{renderResultWithFormatting(result)}</p>
-                        
+                          {renderResultWithFormatting(result)}
                         </div>
                       </div>
                     </div>
@@ -205,8 +212,8 @@ const OllamaDefectChecker = () => {
                 <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-gray-500">
                   <FileImage className="h-8 sm:h-12 w-8 sm:w-12 text-gray-300 mb-3" />
                   <p className="text-center text-xs sm:text-base">
-                    {loading 
-                      ? "Analyzing image..." 
+                    {loading
+                      ? "Analyzing image..."
                       : "Upload an image and click 'Check for Defects' to see results here"}
                   </p>
                 </div>

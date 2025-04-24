@@ -1,6 +1,12 @@
+/**
+ * Version 1
+ * For the File Upload Functionality
+ * Uses Gemini to analyze the image
+ */
+
 import React, { useState } from "react";
-import { UploadCloud, FileImage, Menu } from "lucide-react";
-import Sidebar from "../components/SideNavbar";
+import { UploadCloud, FileImage, Menu, Info, X } from "lucide-react";
+import Sidebar from "../components/Sidebar";
 
 const GeminiDefectChecker = () => {
   const [image, setImage] = useState(null);
@@ -8,6 +14,7 @@ const GeminiDefectChecker = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [noteVisible, setNoteVisible] = useState(true);
 
   //   To handle the image upload and create object url for it
   const handleImageUpload = (event) => {
@@ -29,13 +36,17 @@ const GeminiDefectChecker = () => {
     formData.append("image", image);
 
     try {
-      const response = await fetch("https://intelligent-quality-control-system-pilot.onrender.com/api/classify-image", {
+      // Backend url, where image processing will occur
+      const response = await fetch("http://localhost:5001/api/classify-image", {
         method: "POST",
         body: formData
       });
 
       const data = await response.json();
+      console.log(data);
+      
       setResult(data.classification || "Error");
+      console.log(result);
     } catch (error) {
       console.error("Error classifying image:", error);
       setResult("Error occurred");
@@ -62,6 +73,31 @@ const GeminiDefectChecker = () => {
               <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Gemini</h1>
             </div>
           </div>
+          {/* Informative Note Box */}
+          {noteVisible && (
+            <div
+              className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg mb-6 p-4 relative"
+            >
+              <button
+                onClick={() => setNoteVisible(false)}
+                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="flex flex-col sm:flex-row items-start pr-8">
+                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-blue-600" />
+                <div>
+                  <h3 className="font-semibold mb-2 text-blue-800">Automated Defect Detection Process - File Upload Implementation</h3>
+                  <ul className="list-disc list-inside mt-2 text-sm">
+                    <li>User can simply upload the image.</li>
+                    <li>The image is then passed to the processing module, which analyzes the file using <span className="font-bold">Gemini</span>.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Image upload section */}
@@ -72,7 +108,7 @@ const GeminiDefectChecker = () => {
                 {!preview ? (
                   <>
                     <UploadCloud className="h-12 w-12 text-gray-400 mb-3" />
-                    <span className="text-sm font-medium text-gray-700">Drag and drop or click to upload</span>
+                    <span className="text-sm font-medium text-gray-700">Click to upload the image</span>
                     <span className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, WEBP</span>
                   </>
                 ) : (
@@ -108,7 +144,8 @@ const GeminiDefectChecker = () => {
               {result ? (
                 <div className="mt-2">
                   <div className={`p-4 rounded-md ${result.toLowerCase().includes("defective") && !result.toLowerCase().includes("not defective") ||
-                    result.toLowerCase().includes("does not align")
+                    result.toLowerCase().includes("does not align") ||
+                    result.toLowerCase().includes("Error")
                     ? "bg-red-50 border border-red-200"
                     : "bg-green-50 border border-green-200"
                     }`}>

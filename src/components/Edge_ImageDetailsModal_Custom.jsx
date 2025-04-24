@@ -1,3 +1,7 @@
+/**
+ * Modal getting used in V6
+ */
+
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 

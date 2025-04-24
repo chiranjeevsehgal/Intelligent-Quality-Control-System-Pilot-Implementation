@@ -1,5 +1,9 @@
+/**
+ * Modal getting used in V4 and V5
+ */
+
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const EdgeImageDetailsModal = ({ isOpen, onClose, data }) => {
     if (!isOpen || !data) return null;

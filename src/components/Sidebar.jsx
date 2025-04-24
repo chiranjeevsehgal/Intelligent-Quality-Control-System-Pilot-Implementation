@@ -14,16 +14,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, currentPage }) => {
   
   // Main sidebar items
   const sidebarItems = [
-    { name: "Gemini Upload", icon: <FileText className="h-5 w-5" />, path: "/" },
-    { name: "Ollama Upload", icon: <FileText className="h-5 w-5" />, path: "/ollama" },
-    { name: "Cloud Processing", icon: <FileText className="h-5 w-5" />, path: "/cloudpipeline" }
+    { name: "Gemini Upload (V1)", icon: <FileText className="h-5 w-5" />, path: "/" },
+    { name: "Ollama Upload (V2)", icon: <FileText className="h-5 w-5" />, path: "/ollama" },
+    { name: "Cloud Processing (V3)", icon: <FileText className="h-5 w-5" />, path: "/cloudpipeline" }
   ]
 
   // Edge processing dropdown items
   const edgeProcessingItems = [
-    { name: "With Node Library", path: "/edgepipeline" },
-    { name: "With Airflow+Kafka", path: "/edgepipeline1" },
-    { name: "With Custom Model", path: "/edgepipeline2" }
+    { name: "With Gemini (V4)", path: "/edgepipeline" },
+    { name: "With Gemini (V5)", path: "/edgepipeline1" },
+    { name: "With Yolo V8 (V6)", path: "/edgepipeline2" }
   ]
 
   // To check if the current item is active
@@ -81,9 +81,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, currentPage }) => {
       <div className="flex items-center justify-between p-4 border-b">
         <div className={`flex items-center ${!sidebarOpen && "justify-center w-full"}`}>
           <div className="h-8 w-8 bg-blue-600 rounded-md flex items-center justify-center">
-            <span className="text-white font-bold">QM</span>
+            <span className="text-white font-bold">QC</span>
           </div>
-          {sidebarOpen && <span className="ml-3 font-semibold text-gray-800">Quality Monitor</span>}
+          {sidebarOpen && <span className="ml-3 font-semibold text-gray-800">Quality Control</span>}
         </div>
         <button onClick={toggleSidebar} className={`text-gray-500 hover:text-gray-700 ${!sidebarOpen && "hidden"}`}>
           <Menu className="h-5 w-5" />

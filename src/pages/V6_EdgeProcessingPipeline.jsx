@@ -1,6 +1,14 @@
+/**
+ * Version 5
+ * For the Edge Processing Implementation
+ * Everything needs to be running locally except the model
+ * Uses Airflow + Kafka to monitor changes in the data source(directory)
+ * Uses Yolo V8 for the analysis
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { FileImage, Check, X, Loader2, ChevronRight, ExternalLink, RefreshCw, AlertCircle, Menu, Info, Maximize2 } from "lucide-react";
-import Sidebar from "../components/SideNavbar";
+import Sidebar from "../components/Sidebar";
 import EdgeImageDetailsModal_Custom from "../components/Edge_ImageDetailsModal_Custom";
 
 const EdgeDefectCheckerPipeline_Custom = () => {
@@ -28,11 +36,11 @@ const EdgeDefectCheckerPipeline_Custom = () => {
     const previewContainerRef = useRef(null);
 
     const [originalImage, setOriginalImage] = useState(null);
-    
-    
+
+
     const [currentFile, setCurrentFile] = useState(null);
     const currentFileRef = useRef(null);
-    
+
 
 
 
@@ -76,6 +84,7 @@ const EdgeDefectCheckerPipeline_Custom = () => {
 
     // WebSocket connection setup
     useEffect(() => {
+        // Backend url, where Web socket is initialized
         const socket = new WebSocket("ws://localhost:5001/api/ws");
 
         socket.onopen = () => {
@@ -89,39 +98,27 @@ const EdgeDefectCheckerPipeline_Custom = () => {
             const data = JSON.parse(event.data);
             console.log("Message from server:", data);
 
-            // const parsedData = JSON.parse(data.result.result.data);
-            // console.log(parsedData);
-
             if (data?.result?.annotatedImage) {
-                // setImageData(`data:image/png;base64,${parsedData.image}`);
                 setImageData(data.result.annotatedImage);
             }
 
-            
+
 
             if (data.type === "ORIGINAL" && data.data.previewData) {
                 resetforNext()
                 setOriginalImage(data.data.previewData);
-                setCurrentFileTracked(data.data.filePath); // Use the tracked setter
+                setCurrentFileTracked(data.data.filePath);
                 updateStage('preview', true);
-
             }
-        
 
             if (data.type === "LOCAL_FILE_RESULT" && data.data.annotated) {
-                
-                if (currentFileRef.current === data.data.filePath){
-                    setPreviewSrc(data.data.annotated); 
+
+                if (currentFileRef.current === data.data.filePath) {
+                    setPreviewSrc(data.data.annotated);
                     updateStage('analysis', true);
                     setDefects(data.data.defects);
-                    
-                    // if (data?.data?.defects && data?.data?.defects.length > 0) {
-                    // }
+
                 }
-
-                
-
-
                 setImageQueue(prevQueue => {
                     const newImage = {
                         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -283,7 +280,7 @@ const EdgeDefectCheckerPipeline_Custom = () => {
                             </button>
                         )}
                         <div className="flex justify-between items-center w-full">
-                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Edge (Custom Model)</h1>
+                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Edge (Using Airflow + Kafka)</h1>
                             <button
                                 onClick={resetAllStates}
                                 className="flex items-center px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
@@ -295,21 +292,21 @@ const EdgeDefectCheckerPipeline_Custom = () => {
                     </div>
 
                     {noteVisible && (
-                        <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg mb-6 p-4 relative">
+                        <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg mb-6 p-4 relative">
                             <button
                                 onClick={() => setNoteVisible(false)}
-                                className="absolute top-2 right-2 text-amber-600 hover:text-amber-800 transition-colors"
+                                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 transition-colors"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                             <div className="flex flex-col sm:flex-row items-start pr-8">
-                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-amber-600" />
+                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-blue-600" />
                                 <div>
-                                    <h3 className="font-semibold mb-2 text-amber-800">Automated Defect Detection Process - Edge Implementation</h3>
+                                    <h3 className="font-semibold mb-2 text-blue-800">Automated Defect Detection Process - Edge Implementation</h3>
                                     <ul className="list-disc list-inside mt-2 text-sm">
                                         <li>This demonstration uses Airflow and Kafka to monitor files in a local input directory.</li>
                                         <li>When a file is added or modified, the system detects the change and extracts metadata.</li>
-                                        <li>The metadata is then passed to the processing module, which analyzes the file using our <span className="font-bold">Custom Model</span>.</li>
+                                        <li>The metadata is then passed to the processing module, which analyzes the file using <span className="font-bold">Yolo V8 Model</span>.</li>
                                     </ul>
                                 </div>
                             </div>

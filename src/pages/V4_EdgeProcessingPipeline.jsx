@@ -1,9 +1,17 @@
+/**
+ * Version 4
+ * For the Edge Processing Implementation
+ * Everything needs to be running locally except the model
+ * Uses Node library: Chokidar to monitor changes in the data source(directory)
+ * Uses Gemini for the analysis
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { FileImage, Check, X, Loader2, ChevronRight, ExternalLink, RefreshCw, AlertCircle, Menu, Info } from "lucide-react";
-import Sidebar from "../components/SideNavbar";
+import Sidebar from "../components/Sidebar";
 import EdgeImageDetailsModal from "../components/Edge_ImageDetailsModal";
 
-const EdgeDefectCheckerPipeline_Kafka = () => {
+const EdgeDefectCheckerPipeline = () => {
     const [result, setResult] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [connectionStatus, setConnectionStatus] = useState("disconnected");
@@ -20,7 +28,6 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fullscreenImage, setFullscreenImage] = useState(null);
     const [noteVisible, setNoteVisible] = useState(true);
-    const [currentProcessingId, setCurrentProcessingId] = useState(null);
 
     const isProcessingRef = useRef(false);
 
@@ -54,8 +61,9 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
 
     // WebSocket connection setup
     useEffect(() => {
+        // Backend url, where Web socket is initialized
         const socket = new WebSocket("ws://localhost:5001/api/ws");
- 
+
         socket.onopen = () => {
             console.log("WebSocket connected");
             setConnectionStatus("connected");
@@ -68,6 +76,8 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
             console.log("Message from server:", data);
 
             if (data.type === "LOCAL_FILE_RESULT" && data.data.previewData) {
+                setPreviewSrc(data.data.previewData);
+
                 setImageQueue(prevQueue => {
                     const newImage = {
                         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -120,10 +130,6 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
 
             isProcessingRef.current = true;
             const imageToProcess = imageQueue[nextImageIndex];
-            
-            // Set the current processing ID and preview
-            setCurrentProcessingId(imageToProcess.id);
-            setPreviewSrc(imageToProcess.preview);
 
             setImageQueue(prevQueue =>
                 prevQueue.map((img, idx) =>
@@ -138,6 +144,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                 updateStage('analysis', null);
                 setResult(null);
 
+                setPreviewSrc(imageToProcess.preview);
                 updateStage('preview', true);
 
                 const cachedResult = localStorage.getItem(imageToProcess.filePath);
@@ -151,10 +158,10 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                     );
                     updateStage('analysis', true);
                     isProcessingRef.current = false;
-                    setCurrentProcessingId(null);
                     return;
                 }
 
+                // Backend url, where image processing will occur
                 const analysisResponse = await fetch('http://localhost:5001/api/process-image', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -187,24 +194,13 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                 updateStage('analysis', false);
             } finally {
                 isProcessingRef.current = false;
-                setCurrentProcessingId(null);
             }
         };
 
-        if (!isProcessingRef.current && imageQueue.some(img => img.status === 'pending')) {
+        if (!isProcessingRef.current) {
             processNextImage();
         }
     }, [imageQueue]);
-
-    // Keep showing the preview of the currently processing image
-    useEffect(() => {
-        if (currentProcessingId) {
-            const currentImage = imageQueue.find(img => img.id === currentProcessingId);
-            if (currentImage) {
-                setPreviewSrc(currentImage.preview);
-            }
-        }
-    }, [currentProcessingId, imageQueue]);
 
     // Status display components
     const ProcessStage = ({ name, status }) => {
@@ -257,7 +253,6 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
         setIsLoading(false);
         setImageQueue([]);
         setFullscreenImage(null);
-        setCurrentProcessingId(null);
 
         if (connectionStatus !== "connected") {
             setProcessingStages({
@@ -281,7 +276,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
             <Sidebar
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
-                currentPage="/edgepipeline1"
+                currentPage="/edgepipeline"
             />
 
             <div
@@ -301,7 +296,7 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                             </button>
                         )}
                         <div className="flex justify-between items-center w-full">
-                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Edge (Gemini)</h1>
+                            <h1 className="text-2xl font-bold text-gray-800">Defect Analyzer - Edge (Using Node Library)</h1>
                             <button
                                 onClick={resetAllStates}
                                 className="flex items-center px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
@@ -314,27 +309,23 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
                     {/* Informative Note Box */}
                     {noteVisible && (
                         <div
-                            className="bg-amber-50 border border-amber-200 text-amber-700 rounded-lg mb-6 p-4 relative"
+                            className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg mb-6 p-4 relative"
                         >
                             <button
                                 onClick={() => setNoteVisible(false)}
-                                className="absolute top-2 right-2 text-amber-600 hover:text-amber-800 transition-colors"
+                                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 transition-colors"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                             <div className="flex flex-col sm:flex-row items-start pr-8">
-                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-amber-600" />
+                                <Info className="h-6 w-6 mb-2 sm:mb-0 sm:mr-3 flex-shrink-0 text-blue-600" />
                                 <div>
-                                    <h3 className="font-semibold mb-2 text-amber-800">Automated Defect Detection Process - Edge Implementation</h3>
-                                    <p className="text-sm">
-
-
-                                    </p>
+                                    <h3 className="font-semibold mb-2 text-blue-800">Automated Defect Detection Process - Edge Implementation</h3>
                                     <ul className="list-disc list-inside mt-2 text-sm">
-                                        <li>This demonstration uses Airflow and Kafka to monitor files in a local input directory.</li>
+                                        <li>This demonstration uses a Node.js library to monitor files in a local input directory.</li>
+                                        <li>Folder monitoring is being done through Node library - Chokidar.</li>
                                         <li>When a file is added or modified, the system detects the change and extracts metadata.</li>
                                         <li>The metadata is then passed to the processing module, which analyzes the file using <span className="font-bold">Gemini</span>.</li>
-                                        
                                     </ul>
 
                                 </div>
@@ -543,4 +534,4 @@ const EdgeDefectCheckerPipeline_Kafka = () => {
     );
 };
 
-export default EdgeDefectCheckerPipeline_Kafka;
+export default EdgeDefectCheckerPipeline;

@@ -1,11 +1,11 @@
 import './App.css'
 import { Routes, Route } from "react-router-dom";
-import GeminiDefectChecker from './pages/GeminiDefectChecker';
-import OllamaDefectChecker from './pages/OllamaDefectChecker';
-import CloudDefectCheckerPipeline from './pages/CloudProcessingPipeline';
-import EdgeDefectCheckerPipeline from './pages/EdgeProcessingPipeline';
-import EdgeDefectCheckerPipeline_Kafka from './pages/EdgeProcessingPipeline_Airflow';
-import EdgeDefectCheckerPipeline_Custom from './pages/EdgeProcessingPipeline_Custom';
+import GeminiDefectChecker from './pages/V1_GeminiDefectChecker';
+import OllamaDefectChecker from './pages/V2_OllamaDefectChecker';
+import CloudDefectCheckerPipeline from './pages/V3_CloudProcessingPipeline';
+import EdgeDefectCheckerPipeline from './pages/V4_EdgeProcessingPipeline';
+import EdgeDefectCheckerPipeline_Kafka from './pages/V5_EdgeProcessingPipeline';
+import EdgeDefectCheckerPipeline_Custom from './pages/V6_EdgeProcessingPipeline';
 
 function App() {
   
